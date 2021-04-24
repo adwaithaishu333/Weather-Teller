@@ -19,7 +19,7 @@ Table of Content
 * * * * *
 -   [Getting started](#)
 -   [How to get files](#)
--   [Change and Customization](#)
+-   [Code Details](#)
 -   [How this app's code helps you](#)
 -   [Deployment](#)
 

@@ -1,7 +1,7 @@
 # Weather-Teller
 ### A Weather Teller app that helps you to check the current weather condition of any city 
 -------------------------------------------------
-
+### Visit the app by clicking this [Weather Teller]()
 ![](gif/WT.gif)
 
 

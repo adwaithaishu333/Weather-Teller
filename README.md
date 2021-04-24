@@ -1,13 +1,11 @@
 # Weather-Teller
 ### A Weather Teller app that helps you to check the current weather condition of any city 
-
-#### A attractive and beautiful Weather Teller app
 -------------------------------------------------
 
 ![](gif/WT.gif)
 
 
-#### Just go to `app.js` to add more fucntionalites to the app and make it more wonderfull
+#### Just go to `app.js` and `forecast.js` to add more fucntionalites to the app and make it more wonderfull
 
 #### Feel free to change or customize as much as you want
 
@@ -31,7 +29,7 @@ Getting Started
 
 * * * * *
 
-These instructions will get you a copy of the project up and running on
+These instructions will get you a copy of the project and running on
 your local machine for development and testing purposes
 
 First you will need to install [Git](https://git-scm.com/downloads) and [Node.js](https://nodejs.org/en/download/) on your local machine/computer.
@@ -58,186 +56,126 @@ Change and Customization
 
 * * * * *
 
-You can change the `app.js` file to addd more functionalities to the app
+We have two _JavaScript_ files one is `forecast.js` and other is `app.js`
 
-In the code given below the is for updating the values of input every time the user change the value in any input box
+In file `forecast.js` (as show below) we have the code about how we are getting the city and the weather detail of that city
+
 ```js
-descForm.workTime.addEventListener('keyup',e=>{
-    errorMessage.classList.add('d-none')
-    workDuration = e.target.value;
-    workMinutes = workDuration - 1;
-    timeRatio_of_progress = ((workDuration * 60)/100) * 1000;
-   
-})
-descForm.breakTime.addEventListener('keyup',e=>{  
-    errorMessage.classList.add('d-none')
-    breakDuration = e.target.value;
-    breakMinutes = breakDuration - 1;
+const key = 'CXhPk82ZAZgV0ngVUWdVBVGePc4qMGqf';
 
-})
-descForm.shortDesc.addEventListener('keyup',e=>{
-    errorMessage.classList.add('d-none')
-    shortDesc = e.target.value;    
-})
+const getCity = async(city) =>{
+
+    const url = 'http://dataservice.accuweather.com/locations/v1/cities/search';
+    const query = `?apikey=${key}&q=${city}`
+
+    const response = await fetch(url+query);
+    const data = await response.json();
+    return data[0];
+
+}
+
+
+const getWeather = async(id) =>{
+
+    const url = 'http://dataservice.accuweather.com/currentconditions/v1/'
+    const query = `${id}?apikey=${key}`
+    const response = await fetch(url+query);
+    const data = await response.json();
+
+    return data[0];
+}
 
 ```
-following is the code of operations performing on each button 
+In `getCity()` and  `getWeather()` we have _url_ and _query_ and on the top we have an _API key_
 
-On **start** button firstly we have to check that either any of the input field is empty or not
-if the any of the input field will be empty then we show an error message to the user
-Here we are also storing the _current time_ which is the starting time of the session
+these variables contain a URL ,query and a key, all these data is taken from [AccuWeather.com](https://www.accuweather.com/) which is an open weather app
+
+AccuWeather provide API keys,URLs to get the weather data on the basis of your search (e.g: on city based etc). Please visit [Beginner Tutorial](https://youtu.be/SXsaB9TUfkk). Its a good beginner tutorial to get started with accuweather.
+
+In the above code, after setting the Key ,URLs and query then we are calling the `fetch()` and passing a url with a query which make a complete web address resource to access the data. The Fetch API accesses resources across the network. You can make HTTP requests (using GET, POST and other methods), download, and upload files. `fetch()` starts a request and returns a promise. When the request completes, the promise is resolved with the Response object.  
+
+`getCity()` and `getWeather` are asynchronous functions since they are marked with the async keyword. As `fetch()` return a promise so you have to wait for it be resolved that's why we have marked with a `await` keyword.
+
+In the end we will get a response object in the JSON formate of city details form `getCity()` same is the case with `getWeather()` as they are return a _promises_ we will deal with these promises in the `app.js` file.
+
+
+In `app.js` we have a _async_ function named `updateCity()` as shown below
+
 ```js
-myBtns.addEventListener('click',(e)=>{
-    if(e.target.classList.contains('start')){
-        if(workDuration !== '0' && workDuration !==''){
-            if(breakDuration !== '0' && breakDuration !== ''){
-                if(shortDesc !== ''){
-                    myIntervals();
-                    disabling();
-                    console.log(1)
-                    myBtns.children[1].classList.remove('d-none')
-                    myBtns.children[2].classList.add('d-none')
-                    const checkCurrtime = new Date();
-                    currentTime = checkCurrtime.toLocaleTimeString();
-                }
-                else{
-                errorMessage.classList.remove('d-none')
-                }
-            }
-            else{
-            errorMessage.classList.remove('d-none')
-            }
-        }
-        else{
-            errorMessage.classList.remove('d-none')
-        }
+let updateCity = async (city) =>{
+
+    const cityName = await getCity(city);
+    const weatherDetail = await getWeather(cityName.Key);
+
+    return{cityName,weatherDetail};
+}
+
 ```
-On other (pause,resume,stop) buttons we are performing basic operation as if we click on the _pause button_
-\
-it will cause the _pause button_ to hide and show the _resume button_ same is the operation with _resume button_
+this fucntion is returning an object having city details and weather details
+because _async_ function always return a _promise_ so in the code below
+
 ```js
-        }
-    else if(e.target.classList.contains('pause')){
-        clearInterval(timer1);
-        clearInterval(timer2)
-        myBtns.children[1].classList.add('d-none')
-        myBtns.children[0].classList.remove('d-none')
-    }
-    else if(e.target.classList.contains('resume')){
-        myIntervals();
-        myBtns.children[0].classList.add('d-none')
-        myBtns.children[1].classList.remove('d-none')
-    }
-```
-On _stop button_ we are storing the end time of the session and rendring the task and session time detail on the screen
-```js    
-    else if(e.target.classList.contains('stop')){
-        myBtns.children[0].classList.add('d-none')
-        myBtns.children[1].classList.add('d-none')
-        myBtns.children[2].classList.remove('d-none')
+getCityForm.addEventListener('submit',e =>{
+    e.preventDefault();
 
-        const checkEndtime = new Date();
-        EndTime = checkEndtime.toLocaleTimeString();
+    const city = getCityForm.city.value.trim();
+    getCityForm.reset();
 
-        let html = `
-        <div class="item my-4">
-            <h5 class="px-4 mb-2 pt-3" style="color: green;">${shortDesc}</h5>
-            <p class="px-4 fw-normal">${sessionTime()}</p>
-        </div>     `
-        completed.innerHTML += html
-        clearAll();
-    }
-
+    updateCity(city)
+        .then(data => updateUI(data))
+        .catch(err => {
+            console.log(alert('Please enter a valid city name'))
+            console.log("could not fetch the data",err);
+        })
 })
 
 ```
-Code given below is performing time decreasing operation
+we are getting the name of the city from user and passing the city name as an argument to `updateCity()` fucntion and as we know  _updateCity()_ function will return a _promise_ so we need to deal with that promise (_if the promise is resolved 'then' what? and if it is not resolved 'catch' the error_)
 
-The _Work minutes_ and the _Break minutes_ are the _Work Duration_ and the _Break Duration_ which we get from user 
+When the promise become resolved we have to update our user interface to show the details to the user.
 
-On each call of this function we are decreasing seconds and minutes respectively 
+So in the code above we passes the resolved promise to the `updateUI()` function(_which will update our User Interface_)
 
-Every time the work duration become over 'workMinutes === -1' we start the break session and 
-respectively and when the break session will over we again started the work session
+
+In the `UpdateUI()` fucntion we are simplily first getting the sub details(e.g: Temprature, weatherCondtion etc) of _city and weather details_ and rendring those details on the screen.
 ```js
+const updateUI = (data) =>{
+    wDetail.classList.remove('d-none')
+    cityTime.classList.remove('d-none')
 
-//fucntion, which is for showing the remaining time to user
-let timeReamaining = () =>{
-    seconds = seconds - 1;
-    if(seconds === 0){
-        workMinutes = workMinutes - 1;
-        if(workMinutes === -1){
-            if(breakcount % 2 === 0){
-                workMinutes = breakMinutes;
-                breakcount = breakcount + 1;
-                notice.innerText = `(Break Time)` 
+    const cityDetail = data.cityName;
+    const weatherDetail = data.weatherDetail;
+    console.log(cityDetail)
+    console.log(weatherDetail)
+    degree.textContent = weatherDetail.Temperature.Metric.Value;
+    condition.textContent = weatherDetail.WeatherText
+    const weatherIconNumber = weatherDetail.WeatherIcon
+    icon.setAttribute('src',`icons/${weatherIconNumber}.svg`)
     
-            }else{
-                width = 1;
-                workMinutes = workDuration - 1;
-                breakcount = breakcount + 1;
-                notice.innerText = ' ';
-
-        } 
-    }
-        seconds = 59;
-    }
-```
-
-Code given below is for progress bar, to increase on every call to the fuction 
-```js
-const progressBar1 = document.querySelector('.p1')
-const progressBar2 = document.querySelector('.p2')
-let increaseProgress = () =>{
-    if(width === 100){
-        progressBar1.style.width = 1 + '%'
-        progressBar2.style.width = 1 + '%'
+    //from weather condition we will get timestamp 
+    //So we have to convert it into real time
+    const timestamp = weatherDetail.LocalObservationDateTime;
+    const now = new Date(timestamp)
+    curTime.textContent = now.toLocaleDateString()
+    curCity.textContent = cityDetail.EnglishName
+    if(weatherDetail.isDayTime){
+        curMeridiem.textContent = "Day";
     }else{
-        width ++;
-        progressBar1.style.width = width + '%';
-        progressBar2.style.width = width + '%';
-    
+        curMeridiem.textContent = 'Night';
     }
-    
 }
+
 
 ```
-At the End when the session will be stoped we have to clear all the inputs and the session itself
-So for this purpose we do clear and reset all the variables we want to be cleared as shown below
 
-```js
-let clearAll = () =>{
-    enabling();
-    clearInterval(timer1)
-    clearInterval(timer2)
-    workMinutes = workDuration - 1;
-    seconds = 60;
-    breakMinutes = breakDuration - 1;
-    shortDesc = ''
-    progressBar1.style.width = 1 + '%'
-    progressBar2.style.width = 1 + '%'
-    remTime.textContent = `00:00`
-    notice.textContent = '';
-    width = 1
-
-}
-
-//fuction to show the starting and ending time 
-let sessionTime = () =>{
-    return `Session was started at ${currentTime} and ended at ${EndTime}`
-}
-
-```
-above last `sessionTime` function is for rendring the _current and End_ time of session to the screen
+In the `app.js` you can also change the weather or city details and can make the app more detailed and wonderfull.
 
 How this app's code helps you
 ========================
-In the `time.js` file you can get the javascript code 
+In the `app.js` and `forecast.js` files you can get the javascript code 
 
-Using the code you can be able to creat a pomodoro timer in which you can allow the
-user to set a session time in which user is needed to provide work duration and break duration 
-and the short description about the task
-
+Using the code you can be able to creat a basic Weather Teller app in which you can allow the user to enter the city name
+and then the user will get the detail of the weather condition in that city.
 You have to just check the working of code and apply this code in your project and make your projects more awesome
 
 Deployment

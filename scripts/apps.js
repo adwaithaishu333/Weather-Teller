@@ -51,7 +51,7 @@ const updateUI = (data) =>{
     const now = new Date(timestamp)
     curTime.textContent = now.toLocaleDateString()
     curCity.textContent = cityDetail.EnglishName
-    if(weatherDetail.isDayTime){
+    if(weatherDetail.IsDayTime){
         curMeridiem.textContent = "Day";
     }else{
         curMeridiem.textContent = 'Night';
